@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+    <!-- 配置Job类 -->
+    <bean id="myQuartzTimer" class="com.ydfind.demo.springtimer.QuartzPeriod"></bean>
+    <!-- 配置JobDetail -->
+    <bean id="myQuartzTimerJob" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <!-- 执行目标job -->
+        <property name="targetObject">
+            <ref bean="myQuartzTimer"/>
+        </property>
+        <!-- 要执行的方法 -->
+        <property name="targetMethod" value="doTask"/>
+    </bean>
+    <!-- 配置tirgger触发器 -->
+    <bean id="myQuartzTimerTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+        <!-- jobDetail -->
+        <property name="jobDetail" ref="myQuartzTimerJob"/>
+        <!-- cron表达式，执行时间每10秒执行一次 -->
+        <!-- 可以根据自己的需求指定执行时间 -->
+        <!-- 确保quartz的版本在1.8.6及以前的，否则会报错；每10s跑一次-->
+        <property name="cronExpression" value="0/10 * 0-23 * * ?"/>
+        <!--0 0 05 ? * mon--><!--每周一上午5点执行-->
+        <!--<property name="cronExpression" value="0 0 05 ? * mon"/>-->
+    </bean>
+
+    <!-- 配置Job类 -->
+    <bean id="quartzC1ChangeC2" class="com.ydfind.demo.springtimer.QuartzC1ChangeC2"></bean>
+    <!-- 配置JobDetail -->
+    <bean id="C1ChangeC2QuartzTimerJob" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <!-- 执行目标job -->
+        <property name="targetObject">
+            <ref bean="quartzC1ChangeC2"/>
+        </property>
+        <!-- 要执行的方法 -->
+        <property name="targetMethod" value="doTask"/>
+    </bean>
+    <!-- 配置tirgger触发器 -->
+    <bean id="C1ChangeC2QuartzTimerTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+        <!-- jobDetail -->
+        <property name="jobDetail" ref="C1ChangeC2QuartzTimerJob"/>
+        <!-- cron表达式，执行时间每10秒执行一次 -->
+        <!-- 可以根据自己的需求指定执行时间 -->
+        <!-- 确保quartz的版本在1.8.6及以前的，否则会报错；每10s跑一次-->
+        <property name="cronExpression" value="0/10 * 0-23 * * ?"/>
+        <!--每天23:30执行--><!--0 30 23 * * ?-->
+        <!--<property name="cronExpression" value="0 30 23 * * ?"/>-->
+    </bean>
+
+    <!-- 配置Job类 -->
+    <bean id="quartzDeviceBlock" class="com.ydfind.demo.springtimer.QuartzDeviceBlock"></bean>
+    <!-- 配置JobDetail -->
+    <bean id="DeviceBlockQuartzTimerJob" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <!-- 执行目标job -->
+        <property name="targetObject">
+            <ref bean="quartzDeviceBlock"/>
+        </property>
+        <!-- 要执行的方法 -->
+        <property name="targetMethod" value="doTask"/>
+    </bean>
+    <!-- 配置tirgger触发器 -->
+    <bean id="DeviceBlockQuartzTimerTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+        <!-- jobDetail -->
+        <property name="jobDetail" ref="DeviceBlockQuartzTimerJob"/>
+        <!-- cron表达式，执行时间每10秒执行一次 -->
+        <!-- 可以根据自己的需求指定执行时间 -->
+        <!-- 确保quartz的版本在1.8.6及以前的，否则会报错；每10s跑一次-->
+        <property name="cronExpression" value="0/10 * 0-23 * * ?"/>
+        <!--每天23:30执行--><!--0 30 23 * * ?-->
+        <!--<property name="cronExpression" value="0 30 23 * * ?"/>-->
+    </bean>
+
+    <!-- 配置Job类 -->
+    <bean id="quartzEveningPeak" class="com.ydfind.demo.springtimer.QuartzEveningPeak"></bean>
+    <!-- 配置JobDetail -->
+    <bean id="EveningPeakQuartzTimerJob" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <!-- 执行目标job -->
+        <property name="targetObject">
+            <ref bean="quartzEveningPeak"/>
+        </property>
+        <!-- 要执行的方法 -->
+        <property name="targetMethod" value="doTask"/>
+    </bean>
+    <!-- 配置tirgger触发器 -->
+    <bean id="EveningPeakQuartzTimerTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+        <!-- jobDetail -->
+        <property name="jobDetail" ref="EveningPeakQuartzTimerJob"/>
+        <!-- cron表达式，执行时间每10秒执行一次 -->
+        <!-- 可以根据自己的需求指定执行时间 -->
+        <!-- 确保quartz的版本在1.8.6及以前的，否则会报错；每10s跑一次-->
+        <property name="cronExpression" value="0/10 * 0-23 * * ?"/>
+        <!--每天23:30执行--><!--0 30 23 * * ?-->
+        <!--<property name="cronExpression" value="0 30 23 * * ?"/>-->
+    </bean>
+
+    <!-- 配置Job类 -->
+    <bean id="quartzOfflineTraining" class="com.ydfind.demo.springtimer.QuartzOfflineTraining"></bean>
+    <!-- 配置JobDetail -->
+    <bean id="OfflineTrainingQuartzTimerJob" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <!-- 执行目标job -->
+        <property name="targetObject">
+            <ref bean="quartzOfflineTraining"/>
+        </property>
+        <!-- 要执行的方法 -->
+        <property name="targetMethod" value="doTask"/>
+    </bean>
+    <!-- 配置tirgger触发器 -->
+    <bean id="OfflineTrainingQuartzTimerTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+        <!-- jobDetail -->
+        <property name="jobDetail" ref="OfflineTrainingQuartzTimerJob"/>
+        <!-- cron表达式，执行时间每10秒执行一次 -->
+        <!-- 可以根据自己的需求指定执行时间 -->
+        <!-- 确保quartz的版本在1.8.6及以前的，否则会报错；每10s跑一次-->
+        <property name="cronExpression" value="0/10 * 0-23 * * ?"/>
+        <!--每天23:30执行--><!--0 30 23 * * ?-->
+        <!--<property name="cronExpression" value="0 30 23 * * ?"/>-->
+    </bean>
+
+    <!-- 配置Job类 -->
+    <bean id="myOutOfRange" class="com.ydfind.demo.springtimer.QuartzOutOfRange"></bean>
+    <!-- 配置JobDetail -->
+    <bean id="OutOfRangeQuartzTimerJob" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <!-- 执行目标job -->
+        <property name="targetObject">
+            <ref bean="myOutOfRange"/>
+        </property>
+        <!-- 要执行的方法 -->
+        <property name="targetMethod" value="doTask"/>
+    </bean>
+    <!-- 配置tirgger触发器 -->
+    <bean id="OutOfRangeQuartzTimerTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+        <!-- jobDetail -->
+        <property name="jobDetail" ref="OutOfRangeQuartzTimerJob"/>
+        <!-- cron表达式，执行时间每10秒执行一次 -->
+        <!-- 可以根据自己的需求指定执行时间 -->
+        <!-- 确保quartz的版本在1.8.6及以前的，否则会报错；每10s跑一次-->
+        <property name="cronExpression" value="0/10 * 0-23 * * ?"/>
+        <!--每天23:30执行--><!--0 30 23 * * ?-->
+        <!--<property name="cronExpression" value="0 30 23 * * ?"/>-->
+    </bean>
+
+    <!-- 配置Job类 -->
+    <bean id="mySixToEleven" class="com.ydfind.demo.springtimer.QuartzSixToEleven"></bean>
+    <!-- 配置JobDetail -->
+    <bean id="SixToElevenQuartzTimerJob" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <!-- 执行目标job -->
+        <property name="targetObject">
+            <ref bean="mySixToEleven"/>
+        </property>
+        <!-- 要执行的方法 -->
+        <property name="targetMethod" value="doTask"/>
+    </bean>
+    <!-- 配置tirgger触发器 -->
+    <bean id="SixToElevenQuartzTimerTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+        <!-- jobDetail -->
+        <property name="jobDetail" ref="SixToElevenQuartzTimerJob"/>
+        <!-- cron表达式，执行时间每10秒执行一次 -->
+        <!-- 可以根据自己的需求指定执行时间 -->
+        <!-- 确保quartz的版本在1.8.6及以前的，否则会报错；每10s跑一次-->
+        <property name="cronExpression" value="0/10 * 0-23 * * ?"/>
+        <!--每天23:30执行--><!--0 30 23 * * ?-->
+        <!--<property name="cronExpression" value="0 30 23 * * ?"/>-->
+    </bean>
+
+    <!-- 配置调度工厂 -->
+    <bean class = "org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <property name="triggers">
+            <list>
+                <ref local="myQuartzTimerTrigger" />
+                <ref local="C1ChangeC2QuartzTimerTrigger"/>
+                <ref local="DeviceBlockQuartzTimerTrigger"/>
+                <ref local="EveningPeakQuartzTimerTrigger"/>
+                <ref local="OfflineTrainingQuartzTimerTrigger"/>
+                <ref local="OutOfRangeQuartzTimerTrigger"/>
+                <ref local="SixToElevenQuartzTimerTrigger"/>
+            </list>
+        </property>
+    </bean>
+</beans>

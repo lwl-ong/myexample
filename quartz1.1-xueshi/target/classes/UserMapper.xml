@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8" ?>
+        <!DOCTYPE mapper
+                PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+                "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="test">
+    <!--科二超出电子围栏-->
+    <!--先清理临时表-->
+    <update id="truncateTable">
+        truncate table temp_wxclassrecord1
+    </update>
+    <!--执行存储过程-->
+    <select id="executeTemp" statementType="CALLABLE">
+    {
+        call temp_wxmin(
+            to_char(sysdate-2,'yyyy-mm-dd')
+        )
+    }
+    </select>
+    <!--查询导出-->
+    <select id="queryOutOfRange" resultType="com.ydfind.demo.springtimer.pojo.OutOfRangeUser">
+        select s.areaname,g.shortname,t.carnum from pro_studenttraininfo t left join gen_driveschool g on t.schoolcode = g.driveschoolcode
+        left join sys_areainfo s on s.xzqh=g.regionname
+        where t.classid in (
+        select distinct t.classid from temp_wxclassrecord1 t where t.reason = '超出电子围栏培训'
+        ) and t.starttime<![CDATA[>=]]>trunc(sysdate-2) and t.starttime<![CDATA[<]]>trunc(sysdate-1)
+    </select>
+    <!--C1转C2-->
+    <select id="queryC1ChangeC2" resultType="com.ydfind.demo.springtimer.pojo.C1ChangeC2User">
+        select (select gen.shortname
+                from gen_driveschool gen
+                where gen.driveschoolcode = t.applyschool) as shortname,
+                count(*) as sumnum
+        from PRO_AMENDINFO t
+        left join pro_amendinfodetail p
+        on t.amendid = p.amendid
+        where 1=1
+        and t.applydate between trunc(sysdate-1)
+        and  sysdate
+        and t.auditresult = 'shzt01'
+        and p.field = 'drivecartype'
+        and p.oldcontent = 'dct06'
+        and p.newcontent = 'dct07'
+        group by t.applyschool
+    </select>
+    <!--设备绑定/解绑日报-->
+    <select id="queryDeviceBlock" resultType="com.ydfind.demo.springtimer.pojo.DeviceBlockUser">
+        select
+        sys.areaname,
+        g.shortname,
+        s.plate,
+        t.poscode,
+        t.operatetime,
+        decode(t.operatetype,'3','绑定','解绑') as operatetype,
+        t.message
+        from log_equpos t
+        left join equ_coachcarinfo s
+        on t.carcode = s.carbosnum
+        left join gen_driveschool g on g.driveschoolcode=s.schoolcode
+        left join sys_areainfo sys on sys.xzqh = g.regionname
+        where t.operatetime between trunc(sysdate-1)
+        and  sysdate
+        and t.operatetype in ('3','4')
+    </select>
+    <!--晚上6点到11点还在训练-->
+    <select id="querySixToEleven" resultType="com.ydfind.demo.springtimer.pojo.SixToElevenUser">
+        select s.areaname,g.shortname,t.carnum,t.starttime,t.endtime from pro_studenttraininfo t
+        left join gen_driveschool g on t.schoolcode=g.driveschoolcode
+        left join sys_areainfo s on g.regionname = s.xzqh
+        where t.starttime between trunc(sysdate-1)+18/24 and trunc(sysdate-1)+23/24
+        union
+        select s.areaname,g.shortname,t.carnum,t.starttime,t.endtime from pro_tempstudenttraininfo t
+        left join gen_driveschool g on t.schoolcode=g.driveschoolcode
+        left join sys_areainfo s on g.regionname = s.xzqh
+        where t.starttime between trunc(sysdate-1)+18/24 and trunc(sysdate-1)+23/24
+    </select>
+    <!--晚高峰训练-->
+    <select id="queryEveningPeak" resultType="com.ydfind.demo.springtimer.pojo.EveningPeakUser">
+        select s.areaname,g.shortname,t.carnum,t.starttime ,t.endtime from pro_studenttraininfo t
+        left join gen_driveschool g on t.schoolcode=g.driveschoolcode
+        left join sys_areainfo s on g.regionname = s.xzqh
+        where t.starttime between trunc(sysdate-1)+16.5/24 and trunc(sysdate-1)+18.5/24
+        union
+        select s.areaname,g.shortname,t.carnum,t.starttime,t.endtime from pro_tempstudenttraininfo t
+        left join gen_driveschool g on t.schoolcode=g.driveschoolcode
+        left join sys_areainfo s on g.regionname = s.xzqh
+        where t.starttime between trunc(sysdate-1)+16.5/24 and trunc(sysdate-1)+18.5/24
+    </select>
+    <!--
+      select 标签，配置的是查询语句
+      id 属性，唯一性，在当前文件中唯一  ，属性值 queryList
+      框架执行SQL语句： namespace+"."+queryList  确定SQL语句
+   -->
+    <!--离线训练-->
+    <select id="queryList" resultType="com.ydfind.demo.springtimer.pojo.OfflineTrainingUser">
+        select
+        (select shortname from gen_driveschool t where t.driveschoolcode=p.schoolcode) as  drivingschool,
+        p.carnum as platemumber from
+        (select t.*,row_number() over(partition by t.carnum order by starttime asc) as rn from
+        (select t.carnum,t.schoolcode,t.starttime,t.endtime
+        from pro_studenttraininfo t
+        where t.starttime<![CDATA[ >= ]]>trunc(sysdate-2) and t.starttime <![CDATA[ < ]]>trunc(sysdate-1) and to_number(t.gathertime-t.endtime)*24 <![CDATA[ > ]]> 2
+        union all
+        select t.carnum,t.schoolcode,t.starttime,t.endtime from pro_tempstudenttraininfo t
+        where t.starttime<![CDATA[ >= ]]>trunc(sysdate-2) and t.starttime<![CDATA[ < ]]>trunc(sysdate-1) and to_number(t.gathertime-t.endtime)*24 <![CDATA[ > ]]> 2
+        )t) p
+        where p.rn <![CDATA[ > ]]>1 group by p.carnum,p.schoolcode order by p.schoolcode
+    </select>
+
+    <!--周学时导出-->
+    <select id="queryUserByDate" resultType="com.ydfind.demo.springtimer.pojo.PeriodUser">
+        select p.traindate,p.ct2,m.ct from
+        (
+        select v.traindate ,sum(v.totaltime) as ct2 from
+        (
+        select
+        to_char(t.starttime,'yyyymmdd') as traindate,
+        t.totaltime
+        from pro_tempstudenttraininfo t
+        where  t.starttime<![CDATA[ >= ]]>trunc(sysdate-7) and t.starttime <![CDATA[ < ]]> trunc(sysdate)
+        union all
+        select
+        to_char(t.starttime,'yyyymmdd') as traindate,
+        t.totaltime
+        from pro_studenttraininfo t
+        where t.starttime<![CDATA[ >= ]]>trunc(sysdate-7) and t.starttime <![CDATA[ < ]]> trunc(sysdate)
+        ) v
+        group by v.traindate
+        ) p
+        left join
+        (  select to_char(t.starttime,'yyyymmdd') as traindate,sum(t.totaltime) as ct
+        from pro_stutrainaudithistory t
+        where t.starttime<![CDATA[ >= ]]>trunc(sysdate-7) and t.starttime <![CDATA[ < ]]> trunc(sysdate)
+        group by to_char(t.starttime,'yyyymmdd')
+        ) m
+        on p.traindate = m.traindate order by p.traindate
+    </select>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <!--
+      配置新增数据，标签insert
+      新增数据，SQL语句中，一定会有很多参数
+      参数封装在pojo对象，配置的时候，标签属性parameterType
+      SQL语句中参数的数据类型
+      pojo对象User，封装了所有的数据
+    -->
+    <insert id="saveUser" parameterType="com.ydfind.demo.springtimer.pojo.PeriodUser">
+        <!--
+           传递的参数是对象 pojo
+           #｛pojo对象的属性名！！｝
+        -->
+        insert into usertable(id,name,password,username) values (#{id},#{name},#{password},#{username})
+
+        <!--<selectKey order="AFTER" resultType="Integer" keyProperty="id">
+            SELECT LAST_INSERT_ID ()
+        </selectKey>-->
+    </insert>
+    <!--
+      配置删除数据，标签delete
+    -->
+    <delete id="deleteUserById" parameterType="Integer">
+        delete from user where id = #{id}
+    </delete>
+    <!--
+      配置更新数据，标签update
+    -->
+    <update id="updateUserById" parameterType="com.ydfind.demo.springtimer.pojo.PeriodUser">
+        update user set username=#{username},sex=#{sex},birthday=#{birthday},address=#{address} where id=#{id}
+    </update>
+
+    <!--
+       配置，数据表user模糊查询
+       ${参数名} 写参数名字，固定写为value
+       #{}  ${} 获取参数的区别
+         ${}  适合于特殊场景， SQL语句中的参数是 列名或者表名的时候
+         select * from user order by
+    -->
+    <!--<select id="queryUserByUsername" resultType="com.ydfind.demo.springtimer.pojo.PeriodUser" parameterType="String">
+        select * from user where username like #{value}
+    </select>-->
+
+</mapper>
